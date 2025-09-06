@@ -12,29 +12,34 @@ namespace SilksongDecryptor
 
         static void Main(string[] args)
         {
-            if(args.Length > 2)
+            if (args.Length != 2)
             {
                 Console.WriteLine("Usage: SilksongDecryptor -decrypt|-encrypt <folder_path>");
                 return;
             }
-            if (args[0] == "-decrypt")
+
+            string command = args[0];
+            string folderPath = args[1];
+
+            if (command == "-decrypt")
             {
-                string outpath = Path.Combine(Path.GetDirectoryName(args[1]), Path.GetFileName(args[1]) + "_Decrypted");
+                string outpath = Path.Combine(Path.GetDirectoryName(folderPath), Path.GetFileName(folderPath) + "_Decrypted");
                 Directory.CreateDirectory(outpath);
-                foreach (string path in Directory.GetFiles(args[1], "*.json", SearchOption.AllDirectories))
+                foreach (string path in Directory.GetFiles(folderPath, "*.json", SearchOption.AllDirectories))
                 {
                     string json = File.ReadAllText(path);
-                    TextAsset asset = JsonConvert.DeserializeObject<TextAsset>(json) ?? throw new Exception("Json deresialize failed!");
+                    TextAsset asset = JsonConvert.DeserializeObject<TextAsset>(json) ?? throw new Exception("Json deserialize failed!");
                     string decrypted = Encryption.Decrypt(asset.m_Script);
                     Console.WriteLine($"Decrypted {asset.m_Name}");
                     decrypted = asset.m_Name + "\n" + decrypted;
                     File.WriteAllText(Path.Combine(outpath, Path.ChangeExtension(Path.GetFileName(path), ".txt")), decrypted);
                 }
-            }else if(args[0] == "-encrypt")
+            }
+            else if (command == "-encrypt")
             {
-                string outpath = Path.Combine(Path.GetDirectoryName(args[1]), Path.GetFileName(args[1]) + "_Encrypted");
+                string outpath = Path.Combine(Path.GetDirectoryName(folderPath), Path.GetFileName(folderPath) + "_Encrypted");
                 Directory.CreateDirectory(outpath);
-                foreach (string path in Directory.GetFiles(args[1], "*.txt", SearchOption.AllDirectories))
+                foreach (string path in Directory.GetFiles(folderPath, "*.txt", SearchOption.AllDirectories))
                 {
                     string[] lines = File.ReadAllLines(path);
                     if (lines.Length < 2) continue;
